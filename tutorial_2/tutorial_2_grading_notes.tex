@@ -1,0 +1,43 @@
+\documentclass [a4] {article}
+\author{Julie McCann}
+\title{WSN programming tutorial solution notes 2: Enabling and using Radio Communication.}
+\begin {document}
+\maketitle
+
+\section{Notes:}
+
+Here are some notes concerning grading the student's solution code to WSN programming tutorial 2: Enabling and using Radio Communication. 
+
+The first and most important part is that this code should work. One node should take temperature samples and send it to another node. The receiving node needs to be tethered to a pc via a programming board. The students should be able to show the output of the temperature readings on the screen of the pc. If this is achieved correctly (the output is really from the remote mote) then they should be considered for an A. The student groups need to demonstrate this at their pc.
+
+If there is a problem with the code ensure that all of the steps have been followed, and remove marks based on steps completed incorrectly. In a nutshell, what we are looking for is:
+\linebreak
+\\
+\begin{itemize}
+
+\item All components (especially ActiveMessageC, AMSenderC, AMReceiverC, SerialActiveMessageC, SerialAMSenderC and SerialAMReceiverC) have been included correctly.
+    \begin{itemize}
+    \item Twice in BinkAppC.nc, once to declare, then again to wire using $\rightarrow$
+    \item Once at the top of BlinkC.nc in a \textit{uses interface} declaration.
+    \item It would be nice to see renaming of the communication components using the \textit{as} keyword. This would help determine an A from an A+.
+    \end{itemize}
+ 
+\item The AM components are properly parametrised with the message type.
+    \begin{itemize}
+    \item The parameters are included in the component declaration in BlinkAppC.nc
+    \item The message types have been declared in a header-file somewhere with the structure and the id declared. It would be nice to see a separated message type for radio and serial. It would be extra nice to see separate header files for each message type. Take these points into account when determining grade. 
+    \end{itemize}
+
+\item The send(), sendDone() commands are used properly, and the receive() events are handled properly.
+    \begin{itemize}
+    \item There must be some sort of a flag which indicates that the radio (or Serial port) is being used, set in the send() command, and then unset in the sendDone() command if the message returned is the same as the one sent, and there is no ERROR type returned. Penalise for omission of this flag.
+    \item Data must be properly marshaled into and out of message packets. This is one of the few uses of pointers in TinyOS, and a common point of error.
+    \end{itemize}
+
+\item Radio and Serial stack started using AMControl.start() and SerialAMControl.start(). The respective startDone() events need to be handled, and the radio usage (or Serial port usage) flag mentioned above must be first set here. Once again, lack of this flag and its correct initialisation must be penalised.
+
+\end{itemize}
+
+All of the details mentioned above can be seen in the solution file handed to the students, consult that file for examples of the points made in the notes above, and please contact me if you have any questions.
+
+\end{document}

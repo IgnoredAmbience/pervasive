@@ -1,0 +1,128 @@
+\documentclass [a4] {article}
+\author{Julie McCann}
+\title{WSN programming tutorial solution notes 2: Enabling and using Radio Communication.}
+\begin {document}
+\maketitle
+
+\section{Introduction}
+
+Here are some notes concerning the solution code to WSN programming tutorial 2: Enabling and using Radio Communication. 
+
+\section{Wiring of radio stack to send data from a mote to a base-station.}
+
+\begin{itemize}
+
+\item \textit{Wire in the components you will need for radio communication into your configuration file. Use the active message framework. This means that you will need ActiveMessageC, AMSenderC and AMReceiverC.}
+\linebreak
+\\
+These components need to be included in BlinkAppC.nc. The \textit{component} keyword needs to be used.
+
+\begin{verbatim}
+  components ActiveMessageC;
+  components new AMSenderC(AM_DATAMSG) as DataSender;
+  components new AMReceiverC(AM_DATAMSG) as DataReceiver;
+\end{verbatim}
+
+Then the component needs to be wired using the $\rightarrow$ operator later in the same declaration. 
+
+\begin{verbatim}
+  BlinkC.AMControl -> ActiveMessageC;
+  BlinkC.DataPacket -> DataSender;
+  BlinkC.DataSend -> DataSender;
+  BlinkC.DataReceive -> DataReceiver;
+\end{verbatim}
+
+Note that the radio components AMSenderC and AMReceiverC take parameters in brackets. These parameters are the message types(AM\_DATAMSG). This allows multiple message types to be used, and each one will have its own instance of the radio component. As an application can have multiple instances of the same components, we use the \textit{new} keyword after the \textit{component} keyword, and then include the message id in brackets. These types of components are referred to as generic components, and are similar to the Timer components you have already seen. As with the Timer components, multiple instances of the same component need to be renamed using the \textit{as} keyword. Often in large WSN applications, multiple radio protocols will be used, each with a different message type. In this case you need to use the \textit{as} keyword to rename the radio stack components of each protocol, so that they can be used with the correct message type.
+
+\begin{verbatim}
+  components new AMSenderC(AM_DATAMSG) as DataSender;
+\end{verbatim}
+
+It is very important to remember that the renaming shown above in the component declaration is what the interfaces in the implementation file will be bound too. This is all done in the BlinkAppC.nc file. So, AMSender takes the AM message type AM\_DATAMSG as the parameter, and then is renamed to DataSender. 
+
+Renaming is also done in the implementation file BlinkC.nc. In this case we use the interface AMSend as Data Send. This is declared at the top of the file with the \textit{uses interface} keywords to specify the interface used, along with the \textit{as} keyword to rename. Once again, when multiple message types are used, you will have to use multiple instances of the same interface, one for each message type/protocol.
+
+\begin{verbatim}
+  uses interface AMSend as DataSend;
+\end{verbatim}
+
+Now, here is where things can get tricky. Back in BlinkAppC.nc, we have declared an instance of AMSenderC using the AM\_DATAMSG message type, and renamed it DataSender. In the implementation file we use the AMSend interface (which is implemented in AMSenderC) and rename it DataSend. In the bottom half of BlinkAppC.nc we need to wire DataSend in BlinkC.nc to the DataSender named in the top half of BlinkAppC.nc. This is done using the $\rightarrow$ operator.
+
+\begin{verbatim}
+  BlinkC.DataSend -> DataSender;
+\end{verbatim}
+
+To keep things clear, we specify DataSend as BlinkC.DataSend and then use the $\rightarrow$ to show that it is bound to DataSender(our renamed AMSenderC(AM\_DATAMSG)). This wiring of two renamed things is often a point of error and confusion.
+
+\item \textit{Define your message type. This means declaring it in a header file in the same directory as your application. Your message must be of type nx\_struct.}
+\linebreak
+\\
+As was mentioned in the point above, the Active Message framework can allow for various different message types. These messages are differentiated by their Active Message id. These ids and the message structures need to be declared in a header file so that they are accessible by the message stack code. I find it easy to give each message type its own header file. The message struct itself needs to be of the type nx\_struct. This is a network specific struct provided by TinyOS which can be aligned properly for different types of platform encodings. This allows a big endian platform to communicate with a little endian one, without making us think about message data alignment.  
+
+\item \textit{You must specify the message type to the parametrised components that you wired in. Make sure this is done correctly, it is often a cause of error.}
+\linebreak
+\\
+The reason for this step has been discussed in the points above. The failure to properly ensure that all the nodes in a network have properly declared the message types which they handle is an error that I have seen and made many times. If you find that your nodes are not communicating, please check the message types.
+
+\item \textit{In the implementation file handle the events and use the commands provided by the components. Do not forget to start the radio stack.}
+\linebreak
+\\
+Forgetting to start the radio stack is another major cause error which is very easy to do. The radio components are started in the Boot.booted event which your code has to handle, and which is called after TinyOS finishes booting the operating system. At this point we can call the AMControl.start() command to start the radio. This command will cause an startDone() event to be called, which also needs to be handled. This is a good point to initialise state variable to track the usage of the radio.
+
+\begin{verbatim}
+  event void Boot.booted()
+  {
+    call AMControl.start();
+    call SerialAMControl.start();
+  }
+\end{verbatim}
+
+It is common practise in TinyOS code to use a global flag to indicated when the radio or serial port is being used. We have only one radio, and one serial port on each node. There may be multiple protocols/message types trying to use the one radio or serial port. Bang, we get contention for a resource!
+
+To handle this we need to use a global flag called AMBusy. We initialise this flag in our AMControl.startDone() event.
+
+\begin{verbatim}
+    event void AMControl.startDone(error_t err) {
+        if (err == SUCCESS) {
+            AMBusy    = FALSE;
+        }
+    } 
+\end{verbatim}
+
+We set this flag to TRUE when we successfully send.
+
+\begin{verbatim}
+     if (call DataSend.send(5, &datapkt, sizeof(DataMsg)) == SUCCESS) {
+         AMBusy = TRUE;
+     }
+\end{verbatim}
+
+The flag is then unset when we handle the sendDone() event if the message included in the event parameters is the same as the message sent. 
+
+\begin{verbatim}
+    event void DataSend.sendDone(message_t * msg, error_t error) {
+        if (&datapkt == msg) {
+            AMBusy = FALSE;
+        }
+    }
+\end{verbatim}
+
+The use of this flag is very important.
+
+\item \textit{Compile the code to check for errors.}
+\linebreak
+\\
+A common point of error in C is the use of pointers. This problem is greater when programming resource constrained devices like wireless sensor nodes. There is no hardware memory protection on the class of devices we program using TinyOS. One of the few uses of pointers in TinyOS is for messages. Therefore, you need to be careful and ensure that you de-reference your message fields correctly, and that you store values of the correct type. Pointers are not type safe, so it is easy to try and store data of the wrong size in a message, and get unexpected results when you unpack the message on the receivers side.
+
+\end{itemize}
+
+\section{Wiring the serial stack to the base-station}
+
+Once you understand the process for starting the radio stack, the process for the serial stack is the exact same, except for the fact that the components have the word Serial added to them. The process is exactly the same.
+
+
+\section{Receiving data from the motes, and visualising it on a workstation.}
+
+This part is very self-explanatory. It is here where your logic errors in the code will come out. Look at the implementation notes above for some help.
+
+\end{document}

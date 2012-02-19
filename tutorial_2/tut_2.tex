@@ -1,0 +1,156 @@
+\documentclass [a4] {article}
+\author{Julie McCann}
+\title{WSN programming tutorial 2: Enabling and using Radio Communication.}
+\begin {document}
+\maketitle
+
+\section{Introduction}
+
+The sensing which we did in the previous tutorial is only half of the wireless sensor network story. Once you have the data, you need to communicate it! To do this, we use radio communication to form a network between a node and a base station (a node attached to a pc with a serial cable) so that we may do something with our data. The node samples data from its sensors and sends the data to the basestation. The basestation receives the data, and sends it to the pc over the serial port (or serial over USB in our case). The pc can then process or display the received data. 
+
+Radio communication in TinyOS is done in the same way as sensing. We have to add the radio components to our application (wire them in), then we may use their commands (to send a message we use Send()), and we must handle their events (once the send is completed, we must handle a sendDone event). So, we are using the same command-event paradigm which we used previoulsy to handle the sending and reception of messages with our wireless sensors.
+
+\subsection{Set-up.}
+
+\begin{itemize}
+
+\item Start with the code you were working on last week.
+
+\item Remember to configure your environment using source.
+
+\textbf{$>>$ source ./setup\_env\_tcsh.sh} \\
+
+%\begin{verbatim}
+
+%source ./setup_env_tcsh.sh
+
+%\end{verbatim}
+
+\item Now you are ready to extend the work you did last week, and add radio communication.
+
+\end{itemize}
+
+\section{Wiring of radio stack to send data from a mote to a base-station.}
+
+{\bf Note: the term wiring as it relates to nesC refers to the action of including and using different components in a nesC program. It does not relate to physically wiring hardware on to the motes. }
+
+\begin{itemize}
+
+\item Wire in the components you will need for radio communication into your configuration file. Use the active message framework. This means that you will need ActiveMessageC, AMSenderC and AMReceiverC.
+
+\item Define your message type. This means declaring it in a header file in the same directory as your application. Your message must be of type nx\_struct.
+
+\item You must specify the message type to the parametrised components that you wired in. Make sure this is done correctly, it is often a cause of error.
+
+\item In the implementation file handle the events and use the commands provided by the components. Do not forget to start the radio stack.
+
+\item Compile the code to check for errors.
+
+\end{itemize}
+
+\section{Wiring the serial stack to the base-station}
+
+\begin{itemize}
+
+\item Wire in the components you will need for serial communication into your configuration file. Use the active message framework which includes SerialActiveMessageC, SerialAMSenderC and SerialAMReceiverC.
+
+\item Define your message type. This means declaring it in a header file in the same directory as your application.
+
+\item You must specify the message type to the parametrised components that you wired in. Make sure this is done correctly, it is often a cause of error.
+
+\item In the implementation file, handle the events and use the commands provided by the components. Once again, do not forget to start the serial stack.
+
+\item Compile the code to check for errors.
+
+\end{itemize}
+
+\section{Receiving data from the motes, and visualising it on a workstation.}
+
+\begin{itemize}
+\item Make your motes send sampled temperature values to the base-station.
+
+\item Copy a pair of java programs into your project directory.
+
+\textbf{$>>$ cp /opt/tinyos-2.1.0/support/sdk/java/net/tinyos/tools/Listen.java ./} \\
+\textbf{$>>$ cp /opt/tinyos-2.1.0/support/sdk/java/net/tinyos/tools/MsgReader.java ./} \\
+
+%\begin{verbatim}
+%cp /opt/tinyos-2.1.0/support/sdk/java/net/tinyos/tools/Listen.java ./
+%cp /opt/tinyos-2.1.0/support/sdk/java/net/tinyos/tools/MsgReader.java ./
+%\end{verbatim}
+
+Note: You may need to comment out the package declaration at the very beginning of the above mentioned Java tools (in the .java files). The line will begin with package and will be the first line after the initial comments and before the include statements. Do this if the next step gives you an error.
+
+\item Compile the java programs. 
+
+\textbf{$>>$ javac -classpath /opt/tinyos-2.1.0/support/sdk/java/tinyos.jar $<$program name$>$.java} \\
+
+%\begin{verbatim}
+%javac -classpath /opt/tinyos-2.1.0/support/sdk/java/tinyos.jar <program name>.java 
+%\end{verbatim}
+
+\item Use the java program called Listen to ensure that you are receiving something. You will see the raw packets with values in hexadecimal printed to the terminal.
+
+
+\textbf{$>>$ java -classpath .:/opt/tinyos-2.1.0/support/sdk/java/tinyos.jar Listen -comm serial@/dev/ttyUSB1:micaz} \\
+
+%\begin{verbatim}
+%java -classpath .:/opt/tinyos-2.1.0/support/sdk/java/tinyos.jar \ 
+%Listen -comm serial@/dev/ttyUSB1:micaz 
+%\end{verbatim}
+
+\item Use a program called mig to compile the message you are sending to the serial port into java. This program will create a java representation of your message type, complete with set and get functions. Note, SerialMsg is just what I call my serial message type, you can use whatever name you like, remember to change the name accordingly.
+
+\textbf{$>>$ mig java -java-classname=SerialMsg SerialMsg.h SerialMsg -o SerialMsg.java} \\
+
+%\begin{verbatim}
+%mig java -java-classname=SerialMsg SerialMsg.h SerialMsg -o SerialMsg.java 
+%\end{verbatim}
+
+\item Use javac to compile the java file into a class file. Once again, remember to change the name of the serial message to the name that you are using.
+
+\textbf{$>>$ javac -classpath /opt/tinyos-2.1.0/support/sdk/java/tinyos.jar SerialMsg.java} \\
+
+%\begin{verbatim}
+%javac -classpath /opt/tinyos-2.1.0/support/sdk/java/tinyos.jar SerialMsg.java 
+%\end{verbatim}
+
+\item Now use another java program called MsgReader to read the output from the base-station. 
+
+\textbf{$>>$ java -classpath .:/opt/tinyos-2.1.0/support/sdk/java/tinyos.jar MsgReader SerialMsg -comm serial@/dev/ttyUSB1:micaz } \\
+
+%\begin{verbatim}
+%java -classpath .:/opt/tinyos-2.1.0/support/sdk/java/tinyos.jar \
+%MsgReader SerialMsg -comm serial@/dev/ttyUSB1:micaz 
+%\end{verbatim}
+
+\end{itemize}
+
+\section{What you have learned}
+
+\begin{itemize}
+
+\item How to wire in the components for both radio and serial communication.
+\item How to define message types.
+\item How receive data from a wireless sensor node and output it to a pc terminal.
+
+\end{itemize}
+
+
+\section{EXTRA}
+
+If the work above was too simple, or you would like to learn more, the following on-line tutorial gives the details of a sample application included with tinyos which provides another way to receive and visualise data from a wireless sensor network.
+
+%\textbf{$>>$ } \\
+
+\begin{verbatim}
+
+http://docs.tinyos.net/index.php/Sensing#The_Oscilloscope_application
+
+\end{verbatim}
+
+%\begin{itemize}
+%\item 
+%\end{itemize}
+
+\end{document}

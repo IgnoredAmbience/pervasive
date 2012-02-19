@@ -1,0 +1,97 @@
+\documentclass [a4] {article}
+\author{Julie McCann}
+\title{WSN programming tutorial 3: Egghunt: Unicast communication and radio based networking.}
+\begin {document}
+\maketitle
+
+\section{Introduction}
+
+\begin{itemize}
+
+\item For this tutorial you can either use the code solution from last week's tutorial, or you can write your own code from scratch (for the adventurous!). 
+
+\item Install the code into a directory in your home directory. Configure your environment with the appropriate setup script. \\
+
+\textbf{$>>$ source ./setup\_env\_bash.sh if you are using the bash shell}\\
+\textbf{$>>$ source ./setup\_env\_tcsh.sh if you are using the tcsh shell}
+
+%\begin{verbatim}
+%source ./setup_env_bash.sh if you are using the bash shell
+%source ./setup_env_tcsh.sh if you are using the tcsh shell
+%\end{verbatim}
+
+\item Now you are ready to program the motes with your .nc files.
+
+\end{itemize}
+
+\section{Installation of NesC code on motes}
+
+\begin{itemize}
+\item Build code to check for errors. Fix any errors that you may find.
+
+\textbf{$>>$ make micaz} \\
+%{\bf make micaz}
+
+%\begin{verbatim}
+%make micaz 
+%\end{verbatim}
+
+\item Last week's code used a peer-to-peer network model, every node ran the same code. This week, we are are going to use a client-server model; we will have a sender and a receiver. To do this we will use unicast communication, with the sender explicitly sending its messages to the receiver.
+
+\item For unicast communication you need to specify the node ID to the node at compile time. Replace NODE ID in the example below with the number printed on your node.
+
+\textbf{$>>$ make micaz install,$<$NODE\_ID$>$ mib520,/dev/ttyUSB0} \\
+
+%\begin{verbatim}
+%make micaz install,<NODE\_ID> mib520,/dev/ttyUSB0 
+%\end{verbatim}
+
+\item Make two directories, one for the sender code, and one for the receiver code. Copy the code from last week into both directories.
+
+\item Make the code in the sender directory only take temperature or light samples, and send via radio only to the receiver. The sender does not need to send to the serial port. Likewise, make the receiver only receive from the sender and output to the serial port. The receiver does not need to sample.
+
+\item In the implementation file of the sending node you need to replace the first parameter of the send command: AM\_BROADCAST\_ADDR, to the node ID of the receiving node.
+
+\textbf{OLD: $>>$ DataSend.send(AM\_BROADCAST\_ADDR, \&datapkt, sizeof(DataMsg))} \\
+\textbf{NEW: $>>$ DataSend.send($<$RECEIVER\_NODE$>$, \&datapkt, sizeof(DataMsg))} \\
+
+%\begin{verbatim}
+%OLD: DataSend.send(AM_BROADCAST_ADDR, &datapkt, sizeof(DataMsg))
+%NEW: DataSend.send(<RECEIVER_NODE_ID>, &datapkt, sizeof(DataMsg))
+%\end{verbatim}
+
+\end{itemize}
+
+\section{Cross layer network information and RSSI values}
+
+Many protocols used on WSN use cross layer optimisation. The standard approach to networking is to have a network stack of different layers, such as the physical, data link, network, transport, session, presentation, and application layers of the OSI model. Here, we are going to use cross layer information to pass the RSSI from the data link layer to the application layer, and print it out on the terminal screen. RSSI stands for received signal strength indicator and is a measurement of the power of a received radio signal in decibels. \\
+
+The RSSI information will be interesting because it will enable you to witness first hand one of the greatest challenges of WSN protocol development; that of very unreliable communication links. With wired networks, were you can assume that you will always be connected, albeit with varying throughput rates. This assumption does not hold with WSN because low power radios are used to form networks, so unreliability is the rule, not the exception. \\
+
+All of the steps below relate to the receiver code only. \\
+
+\begin{itemize}
+
+\item To get the RSSI you will need to wire to the component \emph{CC2420ActiveMessageC}, and use the interface \emph{CC2420Packet} use the function \emph{getRssi} for a given message. The function getRssi takes a pointer to a message\_t (the message you just received) as an argument, and returns an unsigned 8 bit integer (uint8\_t). In order to see the real decibel value of the received packets, you need to subtract 45 from the value returned by \emph{getRssi} (or add -45 to the value returned by \emph{getRSSI}). This -45 is an offset specific to the radio transceiver.
+ 
+\item Make the receiver node output the RSSI value of the message it receives from the sender to a pc terminal.
+
+\item Once the code compiles, install it on a pair of nodes. The receiver node will output the RSSI value to a terminal. Walk around with the sending node and watch as the RSSI value changes in the receiving node with distance, and with human interference. Use MsgReader or Listen to print the received values to the terminal.
+
+\item Modify the receive code to use the values of the received RSSI so that the LED's provide some sort of representation of the receiving nodes distance from the transmitting node. This can take the form of different LED's turning on based on RSSI value, or a single LED flashing at a variable rate depending on the RSSI value, or different LED's flashing at different rates in some combination dependant on the RSSI value. The representation is up to you.
+
+\item Have one of the members of your group hide the sending node somewhere in the labs (you may leave the room we are in, but you must remain in the computer labs). The other members of the group must now use the receiving node to find the hidden node. The receiving node can be detached from the programming PC, and be used on its own to find the hidden node.
+
+\end{itemize}
+
+\section{What you have learned}
+
+\begin{itemize}
+
+\item How to use unicast messaging to send a message to a specific receiver.
+\item How to access and use cross layer network information like RSSI.
+\item You have hopefully experienced first hand how unreliable low power radio links can be, and understand why that changes the way we approach networking.
+
+\end{itemize}
+
+\end{document}

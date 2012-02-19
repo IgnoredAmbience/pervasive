@@ -1,0 +1,3 @@
+COMPONENT=BlinkAppC
+SENSORBOARD=mts300
+include $(MAKERULES)

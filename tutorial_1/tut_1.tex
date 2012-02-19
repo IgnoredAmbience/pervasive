@@ -1,0 +1,129 @@
+\documentclass [a4] {article}
+\author{Julie McCann}
+\title{WSN programming tutorial 1: Compiling, installing, and running programs on a wireless sensor node.}
+\begin {document}
+\maketitle
+
+This tutorial is divided into two parts. The first part covers basic set up of the TinyOS environment and the use of timers and tasks. The second part covers sensor configuration and the reading of values through split-phase operations. \\
+
+\textbf{Suggested Reading for part \ref{part_1}:}
+\begin{enumerate}
+\item About Timers in TinyOS: http://www.tinyos.net/tinyos-2.x/doc/html/tep102.html
+\item Schedulers and Tasks in TinyOS: http://www.tinyos.net/tinyos-2.x/doc/html/tep106.html
+\item TinyOS Boot Sequence:  http://www.tinyos.net/tinyos-2.x/doc/html/tep107.html
+\end{enumerate}
+
+\textbf{Suggested Reading for part \ref{part_2}:}
+\begin{enumerate}
+\item Sensors and Sensor Boards http://www.tinyos.net/tinyos-2.x/doc/html/tep109.html
+\item  Chapter 6 of “TinyOS Programming book” by Philip Levis and David Gay
+\end{enumerate}
+
+\part{}
+\label{part_1}
+
+\section{Environment Setup}
+\begin{itemize}
+\item Download from \textbf{CATE} the code to blink a LED and the TinyOS configuration script file.
+\item Install the code into a directory in your home directory. Configure your environment with the appropriate setup script.\\
+\textbf{$>>$ source ./setup\_env\_bash.sh if you are using the bash shell}\\
+\textbf{$>>$ source ./setup\_env\_tcsh.sh if you are using the tcsh shell}
+\item Now you are ready to program the motes using the .nc files provided.
+\end{itemize}
+
+\section{Installation of NesC code on motes}
+
+\begin{itemize}
+\item \textbf{Building and Debugging:} First, build the code using the command. \\
+\textbf{$>>$ make micaz}\\
+Check for errors and fix them if you find any.
+\item \textbf{Installation:} Second, install the Blink application on to the wireless sensor node using the given programming board.\\
+\bf{$>>$ make micaz install,1 mib520,/dev/ttyUSB0}
+\end{itemize}
+
+\section{Modification of NesC code on motes}
+\begin{enumerate}
+
+\item Alter the code so that all of the LEDs toggle multiple times (for instance, 10 times) when Timer0 fires. Because of the speed of the processor, multiple flashes without a delay will be difficult to see. In order to visualise the flashing of the LED, you need to introduce a delay. Using a timer is the easiest way to do this. You can use the same timer, or another timer to introduce the LED delay, the implementation is up to you.
+
+\item Change the code such that the timer fires every second (1024 ticks) and toggles Led0.
+
+\item With Led0 toggling once a second, modify the code to toggle another LED ten times a second. Have the fast LED alternate between Led1 and Led2 every second. Once again, to visualise the LED toggling, add a delay between the LED toggle commands.
+
+\end{enumerate}
+
+\section{Tasks}
+
+\begin{enumerate}
+
+\item Modify the code so that the compute intensive part (the LED changing and toggling) is now in a task. Tasks can be implemented and called as per the template given below:
+
+\begin{verbatim}
+ task void ProcessTask(){}
+ call ProcessTask;
+\end{verbatim}
+
+\item Rewrite the larger tasks as smaller tasks. How does this change the behaviour? 
+\end{enumerate}
+
+\part{}
+\label{part_2}
+
+\section{Wiring Sensor Components}
+
+{\bf Note: the term wiring as it relates to nesC refers to the action of including and using different components in a nesC program. It does not relate to physically wiring hardware on to the motes. }
+
+\begin{enumerate}
+
+\item Wire in the temperature sensor on the MDA100 sensor board. You will also have to add a line to the Makefile:\\
+
+{\bf SENSORBOARD=mda100}
+
+\item In the configuration file  BlinkAppC.nc, include the TempC sensor:
+
+\begin{verbatim}
+components new TempC() as Temp_Sensor;
+BlinkC.Temp_Sensor -> Temp_Sensor;
+\end{verbatim}
+
+\item In the module file BlinkC.nc, include the read interface:
+\begin{verbatim}
+uses interface Read<uint16_t>;
+\end{verbatim}
+\end{enumerate}
+
+\section{Split Phase Operation, calling commands and handling events}
+
+\begin{enumerate}
+
+\item When the timer fires (toggling Led0), read from the temperature sensor by using the command read():
+
+\begin{verbatim}
+call Read.read();
+\end{verbatim}
+
+Read is split-phase operation. When it has finished taking the temperature sample, the read will be complete. Once this occurs the temperature sensor will signal an ``event'' which you need to handle. This is done by implementing the code you wish to use to handle the temperature data in a readDone() event handler.
+
+\item Implement the code to handle your temperature data in the template given below. The temperature value itself is given in the parameter data.
+
+\begin{verbatim}
+event void Read.readDone(error_t result, uint16_t data){ }
+\end{verbatim}
+
+Now that you have the sensor data you can send, or process it. If you intend to process it you will need to store it in a global variable so that it does not get over-written if the same event occurs again.
+
+\end{enumerate}
+
+\section{What you have learned}
+
+\begin{itemize}
+
+\item How to configure your environment to compile programs using the nesC compiler.
+\item The compilation and installation of nesC programs on a wireless sensor node.
+\item How to modify nesC code, and how to use timers and tasks.
+\item How to wire in components, in this the temperature sensor component.
+\item The use of nesC components commands and how to handle events.
+
+\end{itemize}
+
+\end{document}
