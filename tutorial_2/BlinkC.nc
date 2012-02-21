@@ -6,7 +6,6 @@
 module BlinkC
 {
   uses interface Timer<TMilli> as SensorTimer;
-  uses interface Timer<TMilli> as LedTimer;
   uses interface Leds;
   uses interface Boot;
   uses interface Read<uint16_t> as Temp_Sensor;
@@ -51,15 +50,6 @@ implementation
     call Leds.led0Toggle();
     call Temp_Sensor.read();
 
-    call LedTimer.startOneShot(LED_FLASH_PERIOD);
-    
-  }
-
-  event void LedTimer.fired()
-  {
-    
-    call Leds.led0Toggle();
-  
   }
 
   /******** Sensor Reading code *******************/
@@ -77,10 +67,15 @@ implementation
       AMBusy = TRUE;
     }
 
-  event void DataSender.sendDone(message_t* msg, error_t error) { }
+  event void DataSender.sendDone(message_t* msg, error_t error) {
+    call Leds.led1Toggle();
+  }
+
+
   event void AMControl.stopDone(error_t error) {
     if (error == SUCCESS)
       AMBusy = TRUE;
+
   }
 
 }
