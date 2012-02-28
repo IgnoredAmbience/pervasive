@@ -10,7 +10,6 @@ implementation
   components new TempC() as Temp_Sensor;
   components ActiveMessageC;
   components new AMSenderC(AM_DATAMSG) as DataSender;
-  components new AMReceiverC(AM_DATAMSG) as DataReceiver;
 
   BlinkC -> MainC.Boot;
 
@@ -21,6 +20,5 @@ implementation
   BlinkC.AMControl -> ActiveMessageC;
   BlinkC.DataPacket -> DataSender;
   BlinkC.DataSend -> DataSender;
-  BlinkC.DataReceive -> DataReceiver;
 }
 

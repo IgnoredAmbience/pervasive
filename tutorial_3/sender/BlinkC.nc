@@ -1,5 +1,5 @@
 #include "Timer.h"
-#include "DataMsg.h"
+#include "../DataMsg.h"
 
 module BlinkC
 {
@@ -11,7 +11,6 @@ module BlinkC
   uses interface SplitControl as AMControl;
   uses interface Packet as DataPacket;
   uses interface AMSend as DataSend;
-  uses interface Receive as DataReceive;
 }
 implementation
 {
@@ -24,6 +23,8 @@ implementation
   message_t datapkt;
   bool AMBusy;
 
+  int RECEIVER_NODE = 28;
+
   event void Boot.booted()
   {
     temperature_value = 0;
@@ -35,7 +36,6 @@ implementation
   {
     call Leds.led0Toggle();
     call Temp_Sensor.read();
-
   }
 
   event void AMControl.stopDone(error_t err) {
@@ -55,18 +55,6 @@ implementation
     }
   }
 
-  event message_t * DataReceive.receive(message_t * msg, void * payload, uint8_t len) {
-
-    SerialMsg * s_pkt = NULL;
-    DataMsg * d_pkt = NULL;  
-
-    if(len == sizeof(DataMsg)) {
-      d_pkt = (DataMsg *) payload;      
-    } 
-
-    return msg;
-  }
-
   event void Temp_Sensor.readDone(error_t result, uint16_t data) {
     DataMsg * pkt = (DataMsg *)(call DataPacket.getPayload(&datapkt, sizeof(DataMsg)));
     pkt->srcid          = TOS_NODE_ID;
@@ -75,9 +63,8 @@ implementation
     pkt->avg_temp       = 255;
 
     if (AMBusy) {
-    }
-    else {
-      if (call DataSend.send(255, &datapkt, sizeof(DataMsg)) == SUCCESS) {
+    } else {
+      if (call DataSend.send(RECEIVER_NODE, &datapkt, sizeof(DataMsg)) == SUCCESS) {
         AMBusy = TRUE;
       }
     } 
