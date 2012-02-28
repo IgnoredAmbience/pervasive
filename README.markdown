@@ -1,5 +1,9 @@
 # Code for the pervasive computing sensor networks labs
 
+## Motes
+* Group 7
+* Room 563, collection 10.30-11am, return 3-4.30pm
+
 ## Commands
 * ``make micaz``
 * ``make micaz install,1 mib520,/dev/ttyUSB0``
