@@ -8,7 +8,7 @@ module BlinkC
   uses interface Boot;
 
   uses interface SplitControl as AMControl;
-  uses interface Packet as DataPacket;
+  uses interface CC2420Packet as DataPacket;
   uses interface Receive as DataReceive;
 
   uses interface SplitControl as SerialAMControl;

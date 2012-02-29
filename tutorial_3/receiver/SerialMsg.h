@@ -11,6 +11,7 @@ typedef nx_struct SerialMsg {
     nx_uint8_t  header;
     nx_uint16_t srcid;
     nx_int16_t temperature;
+    nx_uint8_t rssi;
 } SerialMsg;
 
 

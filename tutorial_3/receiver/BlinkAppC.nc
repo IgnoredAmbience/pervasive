@@ -6,7 +6,7 @@ configuration BlinkAppC
 implementation
 {
   components MainC, BlinkC, LedsC;
-  components ActiveMessageC;
+  components CC2420ActiveMessageC;
   components new AMReceiverC(AM_DATAMSG) as DataReceiver;
 
   components SerialActiveMessageC;
