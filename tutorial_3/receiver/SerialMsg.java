@@ -7,12 +7,12 @@
 public class SerialMsg extends net.tinyos.message.Message {
 
     /** The default size of this message type in bytes. */
-    public static final int DEFAULT_MESSAGE_SIZE = 5;
+    public static final int DEFAULT_MESSAGE_SIZE = 6;
 
     /** The Active Message type associated with this message. */
     public static final int AM_TYPE = 11;
 
-    /** Create a new SerialMsg of size 5. */
+    /** Create a new SerialMsg of size 6. */
     public SerialMsg() {
         super(DEFAULT_MESSAGE_SIZE);
         amTypeSet(AM_TYPE);
@@ -92,6 +92,9 @@ public class SerialMsg extends net.tinyos.message.Message {
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [temperature=0x"+Long.toHexString(get_temperature())+"]\n";
+      } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
+      try {
+        s += "  [rssi=0x"+Long.toHexString(get_rssi())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       return s;
     }
@@ -285,6 +288,69 @@ public class SerialMsg extends net.tinyos.message.Message {
      */
     public static int sizeBits_temperature() {
         return 16;
+    }
+
+    /////////////////////////////////////////////////////////
+    // Accessor methods for field: rssi
+    //   Field type: byte, signed
+    //   Offset (bits): 40
+    //   Size (bits): 8
+    /////////////////////////////////////////////////////////
+
+    /**
+     * Return whether the field 'rssi' is signed (true).
+     */
+    public static boolean isSigned_rssi() {
+        return true;
+    }
+
+    /**
+     * Return whether the field 'rssi' is an array (false).
+     */
+    public static boolean isArray_rssi() {
+        return false;
+    }
+
+    /**
+     * Return the offset (in bytes) of the field 'rssi'
+     */
+    public static int offset_rssi() {
+        return (40 / 8);
+    }
+
+    /**
+     * Return the offset (in bits) of the field 'rssi'
+     */
+    public static int offsetBits_rssi() {
+        return 40;
+    }
+
+    /**
+     * Return the value (as a byte) of the field 'rssi'
+     */
+    public byte get_rssi() {
+        return (byte)getSIntBEElement(offsetBits_rssi(), 8);
+    }
+
+    /**
+     * Set the value of the field 'rssi'
+     */
+    public void set_rssi(byte value) {
+        setSIntBEElement(offsetBits_rssi(), 8, value);
+    }
+
+    /**
+     * Return the size, in bytes, of the field 'rssi'
+     */
+    public static int size_rssi() {
+        return (8 / 8);
+    }
+
+    /**
+     * Return the size, in bits, of the field 'rssi'
+     */
+    public static int sizeBits_rssi() {
+        return 8;
     }
 
 }

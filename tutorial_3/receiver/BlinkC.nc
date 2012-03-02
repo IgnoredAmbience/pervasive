@@ -6,6 +6,7 @@ module BlinkC
 {
   uses interface Leds;
   uses interface Boot;
+  uses interface Timer<TMilli> as BlinkTimer;
 
   uses interface SplitControl as AMControl;
   uses interface CC2420Packet as DataPacket;
@@ -30,11 +31,18 @@ implementation
   message_t serialpkt;
   bool SerialAMBusy;
 
+  uint8_t blink_delay;
+
   event void Boot.booted()
   {
     temperature_value = 0;
     call AMControl.start();
     call SerialAMControl.start();
+  }
+
+  event void BlinkTimer.fired() {
+    call Leds.led0Toggle();
+    call BlinkTimer.startOneShot(blink_delay);
   }
 
   event void AMControl.stopDone(error_t err) {
@@ -62,14 +70,20 @@ implementation
     s_pkt->header      = SERIALMSG_HEADER;
     s_pkt->srcid       = d_pkt->srcid;
     s_pkt->temperature = d_pkt->temp;
+    s_pkt->rssi        = call DataPacket.getRssi(msg) - 45;
 
-    if(SerialAMBusy) {      
-    }
-    else {
-      if (call SerialSend.send(AM_BROADCAST_ADDR, &serialpkt, sizeof(SerialMsg)) == SUCCESS) {
-        SerialAMBusy = TRUE;
+
+    if(d_pkt->srcid == 27) {
+      if(SerialAMBusy) {      
       }
-    } 
+      else {
+        if (call SerialSend.send(AM_BROADCAST_ADDR, &serialpkt, sizeof(SerialMsg)) == SUCCESS) {
+          SerialAMBusy = TRUE;
+        }
+      }
+      blink_delay = (0xff - s_pkt->rssi) / 1;
+      call BlinkTimer.startOneShot(blink_delay);
+    }
 
     return msg;
   }
