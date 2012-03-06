@@ -15,7 +15,6 @@ module BlinkC
   uses interface SplitControl as SerialAMControl;
   uses interface Packet as SerialPacket;
   uses interface AMSend as SerialSend;
-  uses interface Receive as SerialReceive;
 }
 implementation
 {
@@ -73,17 +72,15 @@ implementation
     s_pkt->rssi        = call DataPacket.getRssi(msg) - 45;
 
 
-    if(d_pkt->srcid == 27) {
-      if(SerialAMBusy) {      
-      }
-      else {
-        if (call SerialSend.send(AM_BROADCAST_ADDR, &serialpkt, sizeof(SerialMsg)) == SUCCESS) {
-          SerialAMBusy = TRUE;
-        }
-      }
-      blink_delay = (0xff - s_pkt->rssi) / 1;
-      call BlinkTimer.startOneShot(blink_delay);
+    if(SerialAMBusy) {
     }
+    else {
+      if (call SerialSend.send(AM_BROADCAST_ADDR, &serialpkt, sizeof(SerialMsg)) == SUCCESS) {
+        SerialAMBusy = TRUE;
+      }
+    }
+    blink_delay = (0xff - s_pkt->rssi) / 1;
+    //call BlinkTimer.startOneShot(blink_delay);
 
     return msg;
   }
@@ -101,11 +98,6 @@ implementation
   } 
   event void SerialSend.sendDone(message_t *msg, error_t error) {
     SerialAMBusy = FALSE;
-
-  }
-
-  event message_t * SerialReceive.receive(message_t * msg, void * payload, uint8_t len) {
-    return msg; 
   }
 }
 

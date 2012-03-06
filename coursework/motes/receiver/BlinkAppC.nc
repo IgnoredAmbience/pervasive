@@ -14,7 +14,6 @@ implementation
 
   components SerialActiveMessageC;
   components new SerialAMSenderC(AM_SERIALMSG) as SerialSender;
-  components new SerialAMReceiverC(AM_SERIALMSG) as SerialReceiver; 
 
   BlinkC -> MainC.Boot;
 
@@ -28,6 +27,5 @@ implementation
   BlinkC.SerialAMControl -> SerialActiveMessageC;
   BlinkC.SerialPacket -> SerialSender;
   BlinkC.SerialSend -> SerialSender;
-  BlinkC.SerialReceive -> SerialReceiver;
 }
 

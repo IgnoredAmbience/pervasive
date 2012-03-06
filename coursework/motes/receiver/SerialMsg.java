@@ -7,12 +7,12 @@
 public class SerialMsg extends net.tinyos.message.Message {
 
     /** The default size of this message type in bytes. */
-    public static final int DEFAULT_MESSAGE_SIZE = 6;
+    public static final int DEFAULT_MESSAGE_SIZE = 10;
 
     /** The Active Message type associated with this message. */
     public static final int AM_TYPE = 11;
 
-    /** Create a new SerialMsg of size 6. */
+    /** Create a new SerialMsg of size 10. */
     public SerialMsg() {
         super(DEFAULT_MESSAGE_SIZE);
         amTypeSet(AM_TYPE);
@@ -91,7 +91,13 @@ public class SerialMsg extends net.tinyos.message.Message {
         s += "  [srcid=0x"+Long.toHexString(get_srcid())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
+        s += "  [sync_p=0x"+Long.toHexString(get_sync_p())+"]\n";
+      } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
+      try {
         s += "  [temperature=0x"+Long.toHexString(get_temperature())+"]\n";
+      } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
+      try {
+        s += "  [light=0x"+Long.toHexString(get_light())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [rssi=0x"+Long.toHexString(get_rssi())+"]\n";
@@ -103,16 +109,16 @@ public class SerialMsg extends net.tinyos.message.Message {
 
     /////////////////////////////////////////////////////////
     // Accessor methods for field: header
-    //   Field type: short, signed
+    //   Field type: short, unsigned
     //   Offset (bits): 0
     //   Size (bits): 8
     /////////////////////////////////////////////////////////
 
     /**
-     * Return whether the field 'header' is signed (true).
+     * Return whether the field 'header' is signed (false).
      */
     public static boolean isSigned_header() {
-        return true;
+        return false;
     }
 
     /**
@@ -166,16 +172,16 @@ public class SerialMsg extends net.tinyos.message.Message {
 
     /////////////////////////////////////////////////////////
     // Accessor methods for field: srcid
-    //   Field type: int, signed
+    //   Field type: int, unsigned
     //   Offset (bits): 8
     //   Size (bits): 16
     /////////////////////////////////////////////////////////
 
     /**
-     * Return whether the field 'srcid' is signed (true).
+     * Return whether the field 'srcid' is signed (false).
      */
     public static boolean isSigned_srcid() {
-        return true;
+        return false;
     }
 
     /**
@@ -228,17 +234,80 @@ public class SerialMsg extends net.tinyos.message.Message {
     }
 
     /////////////////////////////////////////////////////////
-    // Accessor methods for field: temperature
-    //   Field type: short, signed
+    // Accessor methods for field: sync_p
+    //   Field type: int, unsigned
     //   Offset (bits): 24
     //   Size (bits): 16
     /////////////////////////////////////////////////////////
 
     /**
-     * Return whether the field 'temperature' is signed (true).
+     * Return whether the field 'sync_p' is signed (false).
+     */
+    public static boolean isSigned_sync_p() {
+        return false;
+    }
+
+    /**
+     * Return whether the field 'sync_p' is an array (false).
+     */
+    public static boolean isArray_sync_p() {
+        return false;
+    }
+
+    /**
+     * Return the offset (in bytes) of the field 'sync_p'
+     */
+    public static int offset_sync_p() {
+        return (24 / 8);
+    }
+
+    /**
+     * Return the offset (in bits) of the field 'sync_p'
+     */
+    public static int offsetBits_sync_p() {
+        return 24;
+    }
+
+    /**
+     * Return the value (as a int) of the field 'sync_p'
+     */
+    public int get_sync_p() {
+        return (int)getUIntBEElement(offsetBits_sync_p(), 16);
+    }
+
+    /**
+     * Set the value of the field 'sync_p'
+     */
+    public void set_sync_p(int value) {
+        setUIntBEElement(offsetBits_sync_p(), 16, value);
+    }
+
+    /**
+     * Return the size, in bytes, of the field 'sync_p'
+     */
+    public static int size_sync_p() {
+        return (16 / 8);
+    }
+
+    /**
+     * Return the size, in bits, of the field 'sync_p'
+     */
+    public static int sizeBits_sync_p() {
+        return 16;
+    }
+
+    /////////////////////////////////////////////////////////
+    // Accessor methods for field: temperature
+    //   Field type: int, unsigned
+    //   Offset (bits): 40
+    //   Size (bits): 16
+    /////////////////////////////////////////////////////////
+
+    /**
+     * Return whether the field 'temperature' is signed (false).
      */
     public static boolean isSigned_temperature() {
-        return true;
+        return false;
     }
 
     /**
@@ -252,28 +321,28 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'temperature'
      */
     public static int offset_temperature() {
-        return (24 / 8);
+        return (40 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'temperature'
      */
     public static int offsetBits_temperature() {
-        return 24;
+        return 40;
     }
 
     /**
-     * Return the value (as a short) of the field 'temperature'
+     * Return the value (as a int) of the field 'temperature'
      */
-    public short get_temperature() {
-        return (short)getSIntBEElement(offsetBits_temperature(), 16);
+    public int get_temperature() {
+        return (int)getUIntBEElement(offsetBits_temperature(), 16);
     }
 
     /**
      * Set the value of the field 'temperature'
      */
-    public void set_temperature(short value) {
-        setSIntBEElement(offsetBits_temperature(), 16, value);
+    public void set_temperature(int value) {
+        setUIntBEElement(offsetBits_temperature(), 16, value);
     }
 
     /**
@@ -291,17 +360,80 @@ public class SerialMsg extends net.tinyos.message.Message {
     }
 
     /////////////////////////////////////////////////////////
+    // Accessor methods for field: light
+    //   Field type: int, unsigned
+    //   Offset (bits): 56
+    //   Size (bits): 16
+    /////////////////////////////////////////////////////////
+
+    /**
+     * Return whether the field 'light' is signed (false).
+     */
+    public static boolean isSigned_light() {
+        return false;
+    }
+
+    /**
+     * Return whether the field 'light' is an array (false).
+     */
+    public static boolean isArray_light() {
+        return false;
+    }
+
+    /**
+     * Return the offset (in bytes) of the field 'light'
+     */
+    public static int offset_light() {
+        return (56 / 8);
+    }
+
+    /**
+     * Return the offset (in bits) of the field 'light'
+     */
+    public static int offsetBits_light() {
+        return 56;
+    }
+
+    /**
+     * Return the value (as a int) of the field 'light'
+     */
+    public int get_light() {
+        return (int)getUIntBEElement(offsetBits_light(), 16);
+    }
+
+    /**
+     * Set the value of the field 'light'
+     */
+    public void set_light(int value) {
+        setUIntBEElement(offsetBits_light(), 16, value);
+    }
+
+    /**
+     * Return the size, in bytes, of the field 'light'
+     */
+    public static int size_light() {
+        return (16 / 8);
+    }
+
+    /**
+     * Return the size, in bits, of the field 'light'
+     */
+    public static int sizeBits_light() {
+        return 16;
+    }
+
+    /////////////////////////////////////////////////////////
     // Accessor methods for field: rssi
-    //   Field type: byte, signed
-    //   Offset (bits): 40
+    //   Field type: short, unsigned
+    //   Offset (bits): 72
     //   Size (bits): 8
     /////////////////////////////////////////////////////////
 
     /**
-     * Return whether the field 'rssi' is signed (true).
+     * Return whether the field 'rssi' is signed (false).
      */
     public static boolean isSigned_rssi() {
-        return true;
+        return false;
     }
 
     /**
@@ -315,28 +447,28 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'rssi'
      */
     public static int offset_rssi() {
-        return (40 / 8);
+        return (72 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'rssi'
      */
     public static int offsetBits_rssi() {
-        return 40;
+        return 72;
     }
 
     /**
-     * Return the value (as a byte) of the field 'rssi'
+     * Return the value (as a short) of the field 'rssi'
      */
-    public byte get_rssi() {
-        return (byte)getSIntBEElement(offsetBits_rssi(), 8);
+    public short get_rssi() {
+        return (short)getUIntBEElement(offsetBits_rssi(), 8);
     }
 
     /**
      * Set the value of the field 'rssi'
      */
-    public void set_rssi(byte value) {
-        setSIntBEElement(offsetBits_rssi(), 8, value);
+    public void set_rssi(short value) {
+        setUIntBEElement(offsetBits_rssi(), 8, value);
     }
 
     /**
