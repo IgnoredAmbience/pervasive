@@ -56,19 +56,18 @@ implementation
   } 
 
   event message_t * DataReceive.receive(message_t * msg, void * payload, uint8_t len) {
+    SerialMsg * s_pkt;
+    DataMsg * d_pkt;
 
-    SerialMsg * s_pkt = NULL;
-    DataMsg * d_pkt = NULL;  
+    if(len != sizeof(DataMsg)) return msg;
 
-    if(len == sizeof(DataMsg)) {
-      d_pkt = (DataMsg *) payload;      
-    } 
-
+    d_pkt = (DataMsg *) payload;
     s_pkt = (SerialMsg *)(call SerialPacket.getPayload(&serialpkt, sizeof(SerialMsg)));
 
     s_pkt->header      = SERIALMSG_HEADER;
     s_pkt->srcid       = d_pkt->srcid;
     s_pkt->temperature = d_pkt->temp;
+    s_pkt->light       = d_pkt->light;
     s_pkt->rssi        = call DataPacket.getRssi(msg) - 45;
 
 

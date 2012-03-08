@@ -19,6 +19,8 @@ module BlinkC {
     RECEIVER_NODE = 28,
     SEEN_TEMP     = 1,
     SEEN_LIGHT    = 2,
+    LIGHT         = 100,
+    BLINK_TIME    = 20,
   };
 
   message_t datapkt;
@@ -60,7 +62,7 @@ module BlinkC {
       if (AMBusy) {
         // Nothing yet
       } else {
-        if (call DataSend.send(RECEIVER_NODE, &datapkt, sizeof(DataMsg)) == SUCCESS) {
+        if (call DataSend.send(AM_BROADCAST_ADDR, &datapkt, sizeof(DataMsg)) == SUCCESS) {
           AMBusy = TRUE;
         } else {
           call Leds.led2Off();
@@ -92,6 +94,19 @@ module BlinkC {
   }
 
   /** Rx Stack **/
+
+  event message_t* DataReceive.receive(message_t *msg, void *payload, uint8_t len) {
+    DataMsg* d_pkt;
+    if(sizeof(DataMsg) != len) return msg;
+    d_pkt = (DataMsg*) payload;
+
+    if(d_pkt->light < LIGHT) {
+      call Leds.led1On();
+      call BlinkTimer.startOneShot(BLINK_TIME);
+    }
+
+    return msg;
+  }
 
   event void BlinkTimer.fired() {
     call Leds.led1Off();

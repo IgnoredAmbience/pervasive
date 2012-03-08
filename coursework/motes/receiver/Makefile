@@ -4,5 +4,8 @@ SerialMsg.java: SerialMsg.h
 SerialMsg.class: SerialMsg.java
 	javac SerialMsg.java
 
-%:
-	$(MAKE) -f Makefile.tos $<
+install:
+	$(MAKE) -f Makefile.tos micaz install,28 mib520,/dev/ttyUSB0
+
+micaz:
+	$(MAKE) -f Makefile.tos micaz
