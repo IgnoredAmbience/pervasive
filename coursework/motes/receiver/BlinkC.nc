@@ -78,8 +78,9 @@ implementation
         SerialAMBusy = TRUE;
       }
     }
-    blink_delay = (0xff - s_pkt->rssi) / 1;
+    //blink_delay = (0xff - s_pkt->rssi) / 1;
     //call BlinkTimer.startOneShot(blink_delay);
+    call Leds.led0Toggle();
 
     return msg;
   }
