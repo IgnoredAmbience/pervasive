@@ -32,6 +32,7 @@ module BlinkC {
 
   message_t datapkt;
   bool AMBusy;
+
   uint16_t temp_value, light_value;
   uint8_t have_seen;
 
@@ -42,8 +43,9 @@ module BlinkC {
   //With the first bit as is_dark and the last 7 as last_seen (given that
   //last_seen will be capped at around 100 (100 < 2**7)
   struct neighbour {
-    uint8_t last_seen;
+    uint8_t last_seen;          // Length of time ago node was last seen
     bool is_dark;
+    uint16_t last_synch_seen;   // Last packet rcvd from node
   };
 
   struct neighbour neighbours[SENDER_NODE_COUNT];
@@ -84,23 +86,25 @@ module BlinkC {
   }
 
   void doSend() {
-    if((have_seen & SEEN_LIGHT) && (have_seen & SEEN_TEMP)) {
-      DataMsg * pkt = (DataMsg *)(call DataPacket.getPayload(&datapkt, sizeof(DataMsg)));
-      pkt->header = DATAMSG_HEADER;
-      pkt->srcid  = TOS_NODE_ID;
-      pkt->sync_p = 255;
-      pkt->temp   = temp_value;
-      pkt->light  = light_value;
-      pkt->fire   = fire_detected;
+    static uint16_t msg_sync = 0;
 
-      if (AMBusy) {
-        // Nothing yet
-      } else {
+    if((have_seen & SEEN_LIGHT) && (have_seen & SEEN_TEMP)) {
+      if (!AMBusy) {
+        DataMsg * pkt = (DataMsg *)(call DataPacket.getPayload(&datapkt, sizeof(DataMsg)));
+        pkt->header = DATAMSG_HEADER;
+        pkt->srcid  = TOS_NODE_ID;
+        pkt->sync_p = ++msg_sync;
+        pkt->temp   = temp_value;
+        pkt->light  = light_value;
+        pkt->fire   = fire_detected;
+
         if (call DataSend.send(AM_BROADCAST_ADDR, &datapkt, sizeof(DataMsg)) == SUCCESS) {
           AMBusy = TRUE;
         } else {
           call Leds.led2Off();
         }
+      } else { // AMBusy
+        // Cache msg if busy, ignore, other?
       }
 
       testFire();
@@ -174,8 +178,26 @@ module BlinkC {
     d_pkt = (DataMsg*) payload;
 
     if(d_pkt->srcid >= MINIMUM_NODEID && d_pkt->srcid < MINIMUM_NODEID + SENDER_NODE_COUNT) {
-      neighbours[d_pkt->srcid - MINIMUM_NODEID].last_seen = 0;
-      neighbours[d_pkt->srcid - MINIMUM_NODEID].is_dark = (d_pkt->light < LIGHT);
+      int idx = d_pkt->srcid - MINIMUM_NODEID;
+      neighbours[idx].last_seen = 0;
+      neighbours[idx].is_dark = (d_pkt->light < LIGHT);
+      if(neighbours[idx].last_synch_seen < d_pkt->sync_p) {
+        // Relay
+        neighbours[idx].last_synch_seen = d_pkt->sync_p;
+        if(!AMBusy) {
+          DataMsg * pkt = (DataMsg *)(call DataPacket.getPayload(&datapkt, sizeof(DataMsg)));
+          pkt->header = d_pkt->header;
+          pkt->srcid  = d_pkt->srcid;
+          pkt->sync_p = d_pkt->sync_p;
+          pkt->temp   = d_pkt->temp;
+          pkt->light  = d_pkt->light;
+          pkt->fire   = d_pkt->fire;
+
+          if (call DataSend.send(AM_BROADCAST_ADDR, &datapkt, sizeof(DataMsg)) == SUCCESS) {
+            AMBusy = TRUE;
+          }
+        }
+      }
     }
 
     // A simple (rough) synchronisation system, syncs to max node id visible,

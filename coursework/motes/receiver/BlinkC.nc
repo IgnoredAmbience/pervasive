@@ -9,6 +9,7 @@ module BlinkC
   uses interface Timer<TMilli> as BlinkTimer;
 
   uses interface SplitControl as AMControl;
+  uses interface AMPacket as AMDataPacket;
   uses interface CC2420Packet as DataPacket;
   uses interface Receive as DataReceive;
 
@@ -66,6 +67,7 @@ implementation
 
     s_pkt->header      = SERIALMSG_HEADER;
     s_pkt->srcid       = d_pkt->srcid;
+    s_pkt->relayid     = call AMDataPacket.source(msg);
     s_pkt->temperature = d_pkt->temp;
     s_pkt->light       = d_pkt->light;
     s_pkt->fire        = d_pkt->fire;

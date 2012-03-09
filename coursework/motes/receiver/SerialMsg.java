@@ -7,12 +7,12 @@
 public class SerialMsg extends net.tinyos.message.Message {
 
     /** The default size of this message type in bytes. */
-    public static final int DEFAULT_MESSAGE_SIZE = 11;
+    public static final int DEFAULT_MESSAGE_SIZE = 13;
 
     /** The Active Message type associated with this message. */
     public static final int AM_TYPE = 11;
 
-    /** Create a new SerialMsg of size 11. */
+    /** Create a new SerialMsg of size 13. */
     public SerialMsg() {
         super(DEFAULT_MESSAGE_SIZE);
         amTypeSet(AM_TYPE);
@@ -89,6 +89,9 @@ public class SerialMsg extends net.tinyos.message.Message {
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [srcid=0x"+Long.toHexString(get_srcid())+"]\n";
+      } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
+      try {
+        s += "  [relayid=0x"+Long.toHexString(get_relayid())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [sync_p=0x"+Long.toHexString(get_sync_p())+"]\n";
@@ -237,9 +240,72 @@ public class SerialMsg extends net.tinyos.message.Message {
     }
 
     /////////////////////////////////////////////////////////
-    // Accessor methods for field: sync_p
+    // Accessor methods for field: relayid
     //   Field type: int, unsigned
     //   Offset (bits): 24
+    //   Size (bits): 16
+    /////////////////////////////////////////////////////////
+
+    /**
+     * Return whether the field 'relayid' is signed (false).
+     */
+    public static boolean isSigned_relayid() {
+        return false;
+    }
+
+    /**
+     * Return whether the field 'relayid' is an array (false).
+     */
+    public static boolean isArray_relayid() {
+        return false;
+    }
+
+    /**
+     * Return the offset (in bytes) of the field 'relayid'
+     */
+    public static int offset_relayid() {
+        return (24 / 8);
+    }
+
+    /**
+     * Return the offset (in bits) of the field 'relayid'
+     */
+    public static int offsetBits_relayid() {
+        return 24;
+    }
+
+    /**
+     * Return the value (as a int) of the field 'relayid'
+     */
+    public int get_relayid() {
+        return (int)getUIntBEElement(offsetBits_relayid(), 16);
+    }
+
+    /**
+     * Set the value of the field 'relayid'
+     */
+    public void set_relayid(int value) {
+        setUIntBEElement(offsetBits_relayid(), 16, value);
+    }
+
+    /**
+     * Return the size, in bytes, of the field 'relayid'
+     */
+    public static int size_relayid() {
+        return (16 / 8);
+    }
+
+    /**
+     * Return the size, in bits, of the field 'relayid'
+     */
+    public static int sizeBits_relayid() {
+        return 16;
+    }
+
+    /////////////////////////////////////////////////////////
+    // Accessor methods for field: sync_p
+    //   Field type: int, unsigned
+    //   Offset (bits): 40
     //   Size (bits): 16
     /////////////////////////////////////////////////////////
 
@@ -261,14 +327,14 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'sync_p'
      */
     public static int offset_sync_p() {
-        return (24 / 8);
+        return (40 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'sync_p'
      */
     public static int offsetBits_sync_p() {
-        return 24;
+        return 40;
     }
 
     /**
@@ -302,7 +368,7 @@ public class SerialMsg extends net.tinyos.message.Message {
     /////////////////////////////////////////////////////////
     // Accessor methods for field: temperature
     //   Field type: int, unsigned
-    //   Offset (bits): 40
+    //   Offset (bits): 56
     //   Size (bits): 16
     /////////////////////////////////////////////////////////
 
@@ -324,14 +390,14 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'temperature'
      */
     public static int offset_temperature() {
-        return (40 / 8);
+        return (56 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'temperature'
      */
     public static int offsetBits_temperature() {
-        return 40;
+        return 56;
     }
 
     /**
@@ -365,7 +431,7 @@ public class SerialMsg extends net.tinyos.message.Message {
     /////////////////////////////////////////////////////////
     // Accessor methods for field: light
     //   Field type: int, unsigned
-    //   Offset (bits): 56
+    //   Offset (bits): 72
     //   Size (bits): 16
     /////////////////////////////////////////////////////////
 
@@ -387,14 +453,14 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'light'
      */
     public static int offset_light() {
-        return (56 / 8);
+        return (72 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'light'
      */
     public static int offsetBits_light() {
-        return 56;
+        return 72;
     }
 
     /**
@@ -428,7 +494,7 @@ public class SerialMsg extends net.tinyos.message.Message {
     /////////////////////////////////////////////////////////
     // Accessor methods for field: fire
     //   Field type: byte, unsigned
-    //   Offset (bits): 72
+    //   Offset (bits): 88
     //   Size (bits): 8
     /////////////////////////////////////////////////////////
 
@@ -450,14 +516,14 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'fire'
      */
     public static int offset_fire() {
-        return (72 / 8);
+        return (88 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'fire'
      */
     public static int offsetBits_fire() {
-        return 72;
+        return 88;
     }
 
     /**
@@ -491,7 +557,7 @@ public class SerialMsg extends net.tinyos.message.Message {
     /////////////////////////////////////////////////////////
     // Accessor methods for field: rssi
     //   Field type: short, unsigned
-    //   Offset (bits): 80
+    //   Offset (bits): 96
     //   Size (bits): 8
     /////////////////////////////////////////////////////////
 
@@ -513,14 +579,14 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'rssi'
      */
     public static int offset_rssi() {
-        return (80 / 8);
+        return (96 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'rssi'
      */
     public static int offsetBits_rssi() {
-        return 80;
+        return 96;
     }
 
     /**

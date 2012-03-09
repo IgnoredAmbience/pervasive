@@ -23,6 +23,7 @@ implementation
   BlinkC.AMControl -> CC2420ActiveMessageC;
   BlinkC.DataReceive -> DataReceiver;
   BlinkC.DataPacket -> CC2420ActiveMessageC;
+  BlinkC.AMDataPacket -> CC2420ActiveMessageC;
 
   BlinkC.SerialAMControl -> SerialActiveMessageC;
   BlinkC.SerialPacket -> SerialSender;

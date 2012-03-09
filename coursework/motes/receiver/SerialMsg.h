@@ -9,6 +9,7 @@ enum {
 typedef nx_struct SerialMsg {
   nx_uint8_t  header;
   nx_uint16_t srcid;
+  nx_uint16_t relayid;
   nx_uint16_t sync_p;
   nx_uint16_t temperature;
   nx_uint16_t light;
