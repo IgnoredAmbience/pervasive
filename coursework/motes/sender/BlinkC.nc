@@ -165,13 +165,25 @@ module BlinkC {
 
   /** Rx Stack **/
   event message_t* DataReceive.receive(message_t *msg, void *payload, uint8_t len) {
+    static int synced_with = 0;
     DataMsg* d_pkt;
+
+    if(synced_with == 0) synced_with = TOS_NODE_ID;
+
     if(sizeof(DataMsg) != len) return msg;
     d_pkt = (DataMsg*) payload;
 
     if(d_pkt->srcid >= MINIMUM_NODEID && d_pkt->srcid < MINIMUM_NODEID + SENDER_NODE_COUNT) {
       neighbours[d_pkt->srcid - MINIMUM_NODEID].last_seen = 0;
       neighbours[d_pkt->srcid - MINIMUM_NODEID].is_dark = (d_pkt->light < LIGHT);
+    }
+
+    // A simple (rough) synchronisation system, syncs to max node id visible,
+    // resyncs to next max on node going offline
+    // Works well enough over a localised system
+    if(d_pkt->srcid > synced_with || !neighbourAlive(synced_with - MINIMUM_NODEID)) {
+      call SensorTimer.startPeriodic(SAMPLE_PERIOD);
+      synced_with = d_pkt->srcid;
     }
 
     if(d_pkt->light < LIGHT) {
