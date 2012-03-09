@@ -157,7 +157,7 @@ module BlinkC {
   void testFire() {
     // Current - Previous
     int16_t dt = temp_readings[temp_reading_idx] - temp_readings[(temp_reading_idx + 1) % TEMP_READINGS];
-    if(dt >= TEMP_CHANGE && /*light_value < LIGHT &&*/ allNeighboursDark()) {
+    if(dt >= TEMP_CHANGE && light_value < LIGHT && allNeighboursDark()) {
       call Leds.led0On();
       fire_detected = TRUE;
     }
