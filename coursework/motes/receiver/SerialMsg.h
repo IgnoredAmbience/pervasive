@@ -12,6 +12,7 @@ typedef nx_struct SerialMsg {
   nx_uint16_t sync_p;
   nx_uint16_t temperature;
   nx_uint16_t light;
+  nx_bool fire;
   nx_uint8_t rssi;
 } SerialMsg;
 

@@ -7,12 +7,12 @@
 public class SerialMsg extends net.tinyos.message.Message {
 
     /** The default size of this message type in bytes. */
-    public static final int DEFAULT_MESSAGE_SIZE = 10;
+    public static final int DEFAULT_MESSAGE_SIZE = 11;
 
     /** The Active Message type associated with this message. */
     public static final int AM_TYPE = 11;
 
-    /** Create a new SerialMsg of size 10. */
+    /** Create a new SerialMsg of size 11. */
     public SerialMsg() {
         super(DEFAULT_MESSAGE_SIZE);
         amTypeSet(AM_TYPE);
@@ -98,6 +98,9 @@ public class SerialMsg extends net.tinyos.message.Message {
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [light=0x"+Long.toHexString(get_light())+"]\n";
+      } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
+      try {
+        s += "  [fire=0x"+Long.toHexString(get_fire())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [rssi=0x"+Long.toHexString(get_rssi())+"]\n";
@@ -423,9 +426,72 @@ public class SerialMsg extends net.tinyos.message.Message {
     }
 
     /////////////////////////////////////////////////////////
+    // Accessor methods for field: fire
+    //   Field type: byte, unsigned
+    //   Offset (bits): 72
+    //   Size (bits): 8
+    /////////////////////////////////////////////////////////
+
+    /**
+     * Return whether the field 'fire' is signed (false).
+     */
+    public static boolean isSigned_fire() {
+        return false;
+    }
+
+    /**
+     * Return whether the field 'fire' is an array (false).
+     */
+    public static boolean isArray_fire() {
+        return false;
+    }
+
+    /**
+     * Return the offset (in bytes) of the field 'fire'
+     */
+    public static int offset_fire() {
+        return (72 / 8);
+    }
+
+    /**
+     * Return the offset (in bits) of the field 'fire'
+     */
+    public static int offsetBits_fire() {
+        return 72;
+    }
+
+    /**
+     * Return the value (as a byte) of the field 'fire'
+     */
+    public byte get_fire() {
+        return (byte)getSIntBEElement(offsetBits_fire(), 8);
+    }
+
+    /**
+     * Set the value of the field 'fire'
+     */
+    public void set_fire(byte value) {
+        setSIntBEElement(offsetBits_fire(), 8, value);
+    }
+
+    /**
+     * Return the size, in bytes, of the field 'fire'
+     */
+    public static int size_fire() {
+        return (8 / 8);
+    }
+
+    /**
+     * Return the size, in bits, of the field 'fire'
+     */
+    public static int sizeBits_fire() {
+        return 8;
+    }
+
+    /////////////////////////////////////////////////////////
     // Accessor methods for field: rssi
     //   Field type: short, unsigned
-    //   Offset (bits): 72
+    //   Offset (bits): 80
     //   Size (bits): 8
     /////////////////////////////////////////////////////////
 
@@ -447,14 +513,14 @@ public class SerialMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'rssi'
      */
     public static int offset_rssi() {
-        return (72 / 8);
+        return (80 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'rssi'
      */
     public static int offsetBits_rssi() {
-        return 72;
+        return 80;
     }
 
     /**

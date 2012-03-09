@@ -68,6 +68,7 @@ implementation
     s_pkt->srcid       = d_pkt->srcid;
     s_pkt->temperature = d_pkt->temp;
     s_pkt->light       = d_pkt->light;
+    s_pkt->fire        = d_pkt->fire;
     s_pkt->rssi        = call DataPacket.getRssi(msg) - 45;
 
 
