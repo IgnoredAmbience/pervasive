@@ -3,7 +3,7 @@
 ## export used only for bash not tcsh
     TOSROOT="/opt/tinyos-2.1.0";
     TOSDIR="$TOSROOT/tos";
-    CLASSPATH=".:{$TOSROOT}/support/sdk/java";
+    CLASSPATH=".:$TOSROOT/support/sdk/java/tinyos.jar";
     MAKERULES="$TOSROOT/support/make/Makerules";
     export TOSROOT;
     export TOSDIR;
