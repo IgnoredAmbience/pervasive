@@ -83,7 +83,7 @@ public class MsgReader implements net.tinyos.message.MessageListener {
     fireStatus[messageProcessor.nodeToSensorID()] = messageProcessor.getFire();
     
     if (fireStatus[0] || fireStatus[1] || fireStatus[2]){
-    	//client.sendFireRepresentation(fireStatus);
+    	client.sendFireRepresentation(fireStatus);
     }    
   }
 

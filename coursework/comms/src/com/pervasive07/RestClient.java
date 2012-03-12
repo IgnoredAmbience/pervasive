@@ -13,7 +13,7 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.json.*;
 
-public class RestClient implements RestInterface{
+public class RestClient{
 
 
 	ClientResource processingResource;
@@ -26,17 +26,20 @@ public class RestClient implements RestInterface{
 		
 		// Our CouchDB Instance
 		processingResource = new ClientResource("http://146.169.37.129/sensor_data/"); // #TODO FIX URI
+		processingResource.getRequest().getClientInfo().getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
 		
 		// The data collection resource
 		collectionResource = new ClientResource("http://146.169.37.102:8080/energy-data-service/energyInfo/dataSample");
 		collectionResource.getRequest().getClientInfo().getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
 		fireResource = new ClientResource("http://146.169.37.102:8080/energy-data-service/energyInfo/event");
+		fireResource.getRequest().getClientInfo().getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
+
 	}
 
 	public void sendJSON(JSONObject json) {
 
-		sendProcessingJSON(json);
 		sendCollectionJSON(json);
+		//sendProcessingJSON(json);
 	}
 
 	/*
@@ -45,13 +48,7 @@ public class RestClient implements RestInterface{
 	private void sendProcessingJSON(JSONObject json){
 		// # TODO split up the json
 		
-		// SEND
-		/*
-		 *  {  }
-		 */
-		
 		StringRepresentation jsonStringRepresentation;  
-
 
 		// Add the client authentication to the call 
 		ChallengeScheme scheme = ChallengeScheme.HTTP_BASIC; 
@@ -80,7 +77,7 @@ public class RestClient implements RestInterface{
 		// Create a Representation from the json  
 		jsonStringRepresentation = new StringRepresentation(json.toString());
 		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
-		processingResource.post(jsonStringRepresentation);
+		processingResource.put(jsonStringRepresentation);
 	}
 
 	/*
@@ -90,13 +87,7 @@ public class RestClient implements RestInterface{
 		
 		StringRepresentation jsonStringRepresentation = new StringRepresentation(json.toString());
 		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
-		Representation result = collectionResource.post(jsonStringRepresentation);
-		try {
-			System.out.println(result.getText());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		collectionResource.post(jsonStringRepresentation);
 	}
 
 	public void sendFireRepresentation(boolean[] fireStatus){
@@ -115,7 +106,7 @@ public class RestClient implements RestInterface{
 			fireJSON.put("groupName", "Keeley and friends");
 			fireJSON.put("eventType", "FIRE");
 			fireJSON.put("eventMessage", "There is a fire");
-			fireJSON.put("sensorData", sensorIDList);
+			fireJSON.put("sensorIdList", sensorIDList);
 
 
 		} catch (JSONException e) {
@@ -123,7 +114,12 @@ public class RestClient implements RestInterface{
 			e.printStackTrace();
 		}
 		
-		fireResource.post(fireJSON);
+		System.out.println(fireJSON.toString());
+		
+		StringRepresentation jsonStringRepresentation = new StringRepresentation(fireJSON.toString());
+		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
+		
+		fireResource.post(jsonStringRepresentation);
 		
 		
 	}
