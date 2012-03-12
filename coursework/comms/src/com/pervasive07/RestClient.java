@@ -13,7 +13,7 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.json.*;
 
-public class RestClient{
+public class RestClient {
 
 
 	ClientResource processingResource;
@@ -42,40 +42,12 @@ public class RestClient{
 	/*
 	 * Sends the data for processing to CouchDB
 	 */
-	public void sendProcessingJSON(JSONObject json, long timestamp) {
+	public void sendProcessingJSON(JSONObject json) {
+		Thread t = new Thread(new RestClientConcurrent(json));
+		t.start();
+
 		
-		System.out.println(processingResource.toString());
-
-		StringRepresentation jsonStringRepresentation;  
-
-		// Add the client authentication to the call 
-		ChallengeScheme scheme = ChallengeScheme.HTTP_BASIC; 
-		ChallengeResponse authentication = new ChallengeResponse(scheme, "admin", "AWgbUdRae"); 
-		processingResource.setChallengeResponse(authentication); 
-
-		// Send the HTTP GET request 
-		processingResource.get(); 
-
-		if (processingResource.getStatus().isSuccess()) { 
-			// Output the response entity on the JVM console 
-			try {
-				processingResource.getResponseEntity().write(System.out);
-			} 
-			catch (IOException e) {
-				e.printStackTrace();
-			} 
-		} else if (processingResource.getStatus().equals(Status.CLIENT_ERROR_UNAUTHORIZED)) { 
-			// Unauthorized access 
-			System.out.println("Access authorized by the server, check your credentials"); 
-		} else { 
-			// Unexpected status 
-			System.out.println("An unexpected status was returned: " + processingResource.getStatus()); 
-		} 
-		//processingResource.getResponse().setLocationRef(couchDbLocation + timestamp);
-		// Create a Representation from the json  
-		jsonStringRepresentation = new StringRepresentation(json.toString());
-		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
-		processingResource.post(jsonStringRepresentation);
+		
 	}
 
 	/*
@@ -83,9 +55,8 @@ public class RestClient{
 	 */
 	public void sendCollectionJSON(JSONObject json){
 		
-		StringRepresentation jsonStringRepresentation = new StringRepresentation(json.toString());
-		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
-		collectionResource.post(jsonStringRepresentation);
+		Thread t = new Thread(new RestClientConcurrent2(json));
+		t.start();
 	}
 
 	public void sendFireRepresentation(boolean[] fireStatus){
@@ -119,6 +90,70 @@ public class RestClient{
 		
 		fireResource.post(jsonStringRepresentation);
 		
+		
+	}
+	
+	public class RestClientConcurrent2 implements Runnable {
+		JSONObject json;
+			
+		public RestClientConcurrent2(JSONObject json) {
+			this.json = json;
+		}
+		
+		public void run() {
+				
+				StringRepresentation jsonStringRepresentation = new StringRepresentation(json.toString());
+				jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
+				collectionResource.post(jsonStringRepresentation);
+
+		}
+	}
+
+
+	public class RestClientConcurrent implements Runnable {
+		JSONObject json;
+		
+		public RestClientConcurrent(JSONObject json) {
+			this.json = json;
+		}
+
+		
+		@Override
+		public void run() {
+			System.out.println(processingResource.toString());
+
+			StringRepresentation jsonStringRepresentation;  
+
+			// Add the client authentication to the call 
+			ChallengeScheme scheme = ChallengeScheme.HTTP_BASIC; 
+			ChallengeResponse authentication = new ChallengeResponse(scheme, "admin", "AWgbUdRae"); 
+			processingResource.setChallengeResponse(authentication); 
+
+			// Send the HTTP GET request 
+			processingResource.get(); 
+
+			if (processingResource.getStatus().isSuccess()) { 
+				// Output the response entity on the JVM console 
+				try {
+					processingResource.getResponseEntity().write(System.out);
+				} 
+				catch (IOException e) {
+					e.printStackTrace();
+				} 
+			} else if (processingResource.getStatus().equals(Status.CLIENT_ERROR_UNAUTHORIZED)) { 
+				// Unauthorized access 
+				System.out.println("Access authorized by the server, check your credentials"); 
+			} else { 
+				// Unexpected status 
+				System.out.println("An unexpected status was returned: " + processingResource.getStatus()); 
+			} 
+			//processingResource.getResponse().setLocationRef(couchDbLocation + timestamp);
+			// Create a Representation from the json  
+			jsonStringRepresentation = new StringRepresentation(json.toString());
+			jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
+			processingResource.post(jsonStringRepresentation);
+			
+		}
 		
 	}
 }
