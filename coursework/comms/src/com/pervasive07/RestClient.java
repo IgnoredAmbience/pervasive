@@ -19,14 +19,16 @@ public class RestClient{
 	ClientResource processingResource;
 	ClientResource collectionResource;
 	ClientResource fireResource;
+	String couchDbLocation;
 	
 
 	public RestClient() {
 		
 		
 		// Our CouchDB Instance
-		processingResource = new ClientResource("http://146.169.37.129/sensor_data/"); // #TODO FIX URI
-		processingResource.getRequest().getClientInfo().getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
+
+		couchDbLocation = new String("http://146.169.37.129:5984/sensor_data/");
+		processingResource = new ClientResource(couchDbLocation);
 		
 		// The data collection resource
 		collectionResource = new ClientResource("http://146.169.37.102:8080/energy-data-service/energyInfo/dataSample");
@@ -36,18 +38,14 @@ public class RestClient{
 
 	}
 
-	public void sendJSON(JSONObject json) {
-
-		sendCollectionJSON(json);
-		//sendProcessingJSON(json);
-	}
 
 	/*
 	 * Sends the data for processing to CouchDB
 	 */
-	private void sendProcessingJSON(JSONObject json){
-		// # TODO split up the json
+	public void sendProcessingJSON(JSONObject json, long timestamp) {
 		
+		System.out.println(processingResource.toString());
+
 		StringRepresentation jsonStringRepresentation;  
 
 		// Add the client authentication to the call 
@@ -73,17 +71,17 @@ public class RestClient{
 			// Unexpected status 
 			System.out.println("An unexpected status was returned: " + processingResource.getStatus()); 
 		} 
-
+		//processingResource.getResponse().setLocationRef(couchDbLocation + timestamp);
 		// Create a Representation from the json  
 		jsonStringRepresentation = new StringRepresentation(json.toString());
 		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
-		processingResource.put(jsonStringRepresentation);
+		processingResource.post(jsonStringRepresentation);
 	}
 
 	/*
 	 * Sends the data for display to the energy data service
 	 */
-	private void sendCollectionJSON(JSONObject json){
+	public void sendCollectionJSON(JSONObject json){
 		
 		StringRepresentation jsonStringRepresentation = new StringRepresentation(json.toString());
 		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);

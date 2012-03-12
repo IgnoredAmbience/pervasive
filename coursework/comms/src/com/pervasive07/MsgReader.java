@@ -71,13 +71,16 @@ public class MsgReader implements net.tinyos.message.MessageListener {
   
   public void messageReceived(int to, Message message) {
     long t = System.currentTimeMillis();
-    System.out.print("" + t + ": ");
-    System.out.println(message);
+    //System.out.print("" + t + ": ");
+    //System.out.println(message);
     
     MessageProcessor messageProcessor = new MessageProcessor((SerialMsg)message, t);
     
     JSONObject json = messageProcessor.getJSON();
-    client.sendJSON(json);
+    //client.sendCollectionJSON(json);
+    
+    JSONObject processingJson = messageProcessor.getCouchJSON();
+    //client.sendProcessingJSON(processingJson, t);
     
     
     fireStatus[messageProcessor.nodeToSensorID()] = messageProcessor.getFire();
