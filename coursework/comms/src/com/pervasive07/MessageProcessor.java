@@ -42,20 +42,35 @@ public class MessageProcessor {
 	}
 	
 	private void setup() {
-	    JSONObject json = getJSON();
 	    RestClient sendClient = new RestClient();
-	    sendClient.sendJSON(json);
+	    sendClient.sendCollectionJSON(getJSON());
+		sendClient.sendProcessingJSON(getCouchJSON(), timestamp);
 	}
 
+	public JSONObject getCouchJSON() {
+		JSONObject json = new JSONObject();
+
+
+		try{
+			json.put("temp", temp);
+			json.put("lux", lux);
+		}
+		catch (JSONException e){
+			e.printStackTrace();
+		}
+		return json;
+		
+	}
+	
 	public JSONObject getJSON(){
 		JSONObject json = new JSONObject();
 		
 		
 		try{
-		json.put("groupId", "7");
-		json.put("key", "AWgbUdRae");
-		json.put("groupName", "Keeley and friends");
-		json.put("sensorData", getSensorIDList());
+			json.put("groupId", "7");
+			json.put("key", "AWgbUdRae");
+			json.put("groupName", "Keeley and friends");
+			json.put("sensorData", getSensorIDList());
 		}
 		catch (JSONException e){
 			e.printStackTrace();

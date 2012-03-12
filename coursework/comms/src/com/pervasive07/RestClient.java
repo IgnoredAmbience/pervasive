@@ -19,13 +19,15 @@ public class RestClient implements RestInterface{
 	ClientResource processingResource;
 	ClientResource collectionResource;
 	ClientResource fireResource;
+	String couchDbLocation;
 	
 
 	public RestClient() {
 		
 		
 		// Our CouchDB Instance
-		processingResource = new ClientResource("http://146.169.37.129/sensor_data/"); // #TODO FIX URI
+		couchDbLocation = new String("http://146.169.37.129:5984/sensor_data/");
+		//processingResource = new ClientResource(); // #TODO FIX URI 5984
 		
 		// The data collection resource
 		collectionResource = new ClientResource("http://146.169.37.102:8080/energy-data-service/energyInfo/dataSample");
@@ -42,14 +44,13 @@ public class RestClient implements RestInterface{
 	/*
 	 * Sends the data for processing to CouchDB
 	 */
-	private void sendProcessingJSON(JSONObject json){
-		// # TODO split up the json
+	public void sendProcessingJSON(JSONObject json, long timestamp) {
 		
-		// SEND
-		/*
-		 *  {  }
-		 */
+	
+
 		
+		processingResource = new ClientResource(couchDbLocation + timestamp);
+		System.out.println(processingResource.toString());
 		StringRepresentation jsonStringRepresentation;  
 
 
@@ -80,13 +81,13 @@ public class RestClient implements RestInterface{
 		// Create a Representation from the json  
 		jsonStringRepresentation = new StringRepresentation(json.toString());
 		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
-		processingResource.post(jsonStringRepresentation);
+		processingResource.put(jsonStringRepresentation);
 	}
 
 	/*
 	 * Sends the data for display to the energy data service
 	 */
-	private void sendCollectionJSON(JSONObject json){
+	public void sendCollectionJSON(JSONObject json){
 		
 		StringRepresentation jsonStringRepresentation = new StringRepresentation(json.toString());
 		jsonStringRepresentation.setMediaType(MediaType.APPLICATION_JSON);
