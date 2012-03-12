@@ -46,6 +46,8 @@ import java.util.*;
 
 import org.json.JSONObject;
 
+import com.pervasive07.RestClient.RestClientConcurrent;
+
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
 import net.tinyos.util.*;
@@ -71,19 +73,24 @@ public class MsgReader implements net.tinyos.message.MessageListener {
   
   public void messageReceived(int to, Message message) {
     long t = System.currentTimeMillis();
-    System.out.print("" + t + ": ");
-    System.out.println(message);
+    //System.out.print("" + t + ": ");
+    //System.out.println(message);
     
     MessageProcessor messageProcessor = new MessageProcessor((SerialMsg)message, t);
     
     JSONObject json = messageProcessor.getJSON();
-    client.sendJSON(json);
+    client.sendCollectionJSON(json);
+    
+    JSONObject processingJson = messageProcessor.getCouchJSON(); 
+    client.sendProcessingJSON(processingJson);
+    
+    
     
     
     fireStatus[messageProcessor.nodeToSensorID()] = messageProcessor.getFire();
     
     if (fireStatus[0] || fireStatus[1] || fireStatus[2]){
-    	//client.sendFireRepresentation(fireStatus);
+    	client.sendFireRepresentation(fireStatus);
     }    
   }
 
