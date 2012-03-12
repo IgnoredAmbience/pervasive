@@ -10,7 +10,7 @@ public class MessageProcessor {
 	int offset;
 	long timestamp;
 	int nodeID;
-	int temp;
+	double temp;
 	int lux;
 	boolean fire;
 	
@@ -19,11 +19,26 @@ public class MessageProcessor {
 		offset = message.baseOffset();
 		timestamp = time;
 		nodeID = message.get_srcid();
-		temp = message.get_temperature();
+		temp = convertTemp(message.get_temperature());
 		lux = message.get_light();
 		fire = (0 != message.get_fire());
 		
 		setup();
+	}
+	
+	private double convertTemp(int adc) {
+		final int ADC_FS = 1023;
+		final int r1 = 10000; // Ohms
+		final double a = 0.001010024;
+		final double b = 0.000242127;
+		final double c = 0.000000146;
+		
+		double r_thr = r1*(ADC_FS-adc)/adc;
+		
+		double ln = Math.log(r_thr);
+		double recip = a + b * ln + c * Math.pow(ln, 3);
+		
+		return 1/recip;
 	}
 	
 	private void setup() {
