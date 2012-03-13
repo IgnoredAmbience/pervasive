@@ -6,6 +6,6 @@
 enum {
   MINIMUM_NODEID = 25,        // Used for storing neighbour statuses
   SENDER_NODE_COUNT = 3,      // ditto
-}
+};
 
 #endif
