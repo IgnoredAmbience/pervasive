@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include "../config.h"
 #include "../DataMsg.h"
 #include "SerialMsg.h"
 
@@ -18,12 +19,6 @@ module BlinkC
 }
 implementation
 {
-
-  enum{
-    SENDER_NODE_COUNT = 3,
-    MINIMUM_NODEID = 25,
-  };
-
   message_t datapkt;
   bool AMBusy;
 

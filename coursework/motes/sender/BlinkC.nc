@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include "../config.h"
 #include "../DataMsg.h"
 
 module BlinkC {
@@ -16,18 +17,17 @@ module BlinkC {
 } implementation {
   enum{
     SAMPLE_PERIOD = 1024,       // Time in ms to samplpe sensors / main work loop
-
-    RECEIVER_NODE = 28,         // Or multicast
-    MINIMUM_NODEID = 25,        // Used for storing neighbour statuses
-    SENDER_NODE_COUNT = 3,      // ditto
     NEIGHBOUR_TIMEOUT = 10,     // Time at which neighbours considered dead
+
+    RECEIVER_NODE = 28,         // Used for (if there is a) unicast transmissions to sink
 
     SEEN_TEMP     = 1,          // Bitmask for determining whether both light/temp seen before tx
     SEEN_LIGHT    = 2,          // ditto
+
     LIGHT         = 100,        // Light/Dark threshold value
     TEMP_CHANGE   = 20,         // Temp change required (raw ADC) for fire reading
     TEMP_READINGS = 30,         // Number of temp readings to check for fire determination
-    BLINK_TIME    = 20,         // Length of time to blink fire LED on for (tx LED toggled on tx/done)
+    BLINK_TIME    = 20,         // Length of time to blink dark LED on for (tx LED toggled on tx/done)
 
     RELAYING      = FALSE,      // Enable flood-routing
   };
