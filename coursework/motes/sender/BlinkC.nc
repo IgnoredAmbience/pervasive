@@ -41,9 +41,6 @@ module BlinkC {
   uint8_t temp_reading_idx = 0;
   uint16_t temp_readings[TEMP_READINGS] = { 0 };
 
-  //Could probably pack is_dark and last_seen into a byte
-  //With the first bit as is_dark and the last 7 as last_seen (given that
-  //last_seen will be capped at around 100 (100 < 2**7)
   struct neighbour {
     uint8_t last_seen;          // Length of time ago node was last seen
     bool is_dark;
@@ -52,7 +49,7 @@ module BlinkC {
 
   struct neighbour neighbours[SENDER_NODE_COUNT];
 
-  // Set when a fire is detected, does not get reset
+  // Set when a fire is detected, retested at every sample
   bool fire_detected = FALSE;
 
   void testFire();
@@ -87,6 +84,7 @@ module BlinkC {
     }
   }
 
+  // Packs both sensor readings (Temp/Light) into one packet for tx to save power
   void doSend() {
     static uint16_t msg_sync = 0;
 
@@ -118,6 +116,7 @@ module BlinkC {
   event void Temp_Sensor.readDone(error_t result, uint16_t data) {
     temp_value = data;
 
+    // Test for fire state, save last n readings
     // On first run, initialise all readings to current
     if(temp_readings[0] == 0) {
       int i;
@@ -125,6 +124,7 @@ module BlinkC {
         temp_readings[i] = temp_value;
       }
     } else {
+      // Round-robin our readings
       temp_reading_idx = (temp_reading_idx + 1) % TEMP_READINGS;
       temp_readings[temp_reading_idx] = temp_value;
     }
@@ -146,6 +146,7 @@ module BlinkC {
     }
   }
 
+  // True if neighbour index (0-n) was last seen within timeout
   bool neighbourAlive(int i) {
     return neighbours[i].last_seen < NEIGHBOUR_TIMEOUT;
   }
@@ -161,8 +162,9 @@ module BlinkC {
   }
 
   void testFire() {
-    // Current - Previous
+    // Current - Previous (Round-robin)
     int16_t dt = temp_readings[temp_reading_idx] - temp_readings[(temp_reading_idx + 1) % TEMP_READINGS];
+
     if(dt >= TEMP_CHANGE && light_value < LIGHT && allNeighboursDark()) {
       call Leds.led0On();
       fire_detected = TRUE;
@@ -177,17 +179,20 @@ module BlinkC {
     static int synced_with = 0;
     DataMsg* d_pkt;
 
-    if(synced_with == 0) synced_with = TOS_NODE_ID;
+    if(synced_with == 0) synced_with = TOS_NODE_ID; // (Init)
 
     if(sizeof(DataMsg) != len) return msg;
     d_pkt = (DataMsg*) payload;
 
     if(d_pkt->srcid >= MINIMUM_NODEID && d_pkt->srcid < MINIMUM_NODEID + SENDER_NODE_COUNT) {
+      // Cache node (meta-)data
       int idx = d_pkt->srcid - MINIMUM_NODEID;
       neighbours[idx].last_seen = 0;
       neighbours[idx].is_dark = (d_pkt->light < LIGHT);
+
+
+      // Flood-routing
       if(RELAYING && neighbours[idx].last_synch_seen < d_pkt->sync_p) {
-        // Relay
         neighbours[idx].last_synch_seen = d_pkt->sync_p;
         if(!AMBusy) {
           DataMsg * pkt = (DataMsg *)(call DataPacket.getPayload(&datapkt, sizeof(DataMsg)));
@@ -206,13 +211,14 @@ module BlinkC {
     }
 
     // A simple (rough) synchronisation system, syncs to max node id visible,
-    // resyncs to next max on node going offline
-    // Works well enough over a localised system
+    // resyncs to next max on node going offline (NEIGHBOUR_TIMEOUT)
+    // Worked quite well under a range of test schemes
     if(d_pkt->srcid > synced_with || !neighbourAlive(synced_with - MINIMUM_NODEID)) {
       call SensorTimer.startPeriodic(SAMPLE_PERIOD);
       synced_with = d_pkt->srcid;
     }
 
+    // Blink green LED if a neighbour is dark (v. useful for testing routing and ranging!)
     if(d_pkt->light < LIGHT) {
       call Leds.led1On();
       call BlinkTimer.startOneShot(BLINK_TIME);
@@ -222,6 +228,7 @@ module BlinkC {
   }
 
   event void BlinkTimer.fired() {
+    // Green LED blink off (triggered from DataReceive.receive)
     call Leds.led1Off();
   }
 

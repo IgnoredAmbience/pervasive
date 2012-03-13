@@ -27,6 +27,7 @@ implementation
 
   uint16_t seen_neighbour_packet[SENDER_NODE_COUNT];
 
+  /** Init **/
   event void Boot.booted()
   {
     call AMControl.start();
@@ -45,6 +46,19 @@ implementation
     }
   } 
 
+  event void SerialAMControl.stopDone(error_t err) {
+    if(err == SUCCESS){
+      SerialAMBusy = TRUE;
+    }
+  }
+
+  event void SerialAMControl.startDone(error_t err) {
+    if (err == SUCCESS) {
+      SerialAMBusy = FALSE;
+    }
+  } 
+
+  /** Rx stack **/
   event message_t * DataReceive.receive(message_t * msg, void * payload, uint8_t len) {
     SerialMsg * s_pkt;
     DataMsg * d_pkt;
@@ -54,6 +68,8 @@ implementation
 
     d_pkt = (DataMsg *) payload;
 
+    // When flood routing, make sure we only return a given packet once
+    // (Packets are identified by (srcid,sync_p) pairs)
     id = d_pkt->srcid - MINIMUM_NODEID;
     if(id < 0 || id >= SENDER_NODE_COUNT) return msg;
 
@@ -83,17 +99,6 @@ implementation
     return msg;
   }
 
-  event void SerialAMControl.stopDone(error_t err) {
-    if(err == SUCCESS){
-      SerialAMBusy = TRUE;
-    }
-  }
-
-  event void SerialAMControl.startDone(error_t err) {
-    if (err == SUCCESS) {
-      SerialAMBusy = FALSE;
-    }
-  } 
   event void SerialSend.sendDone(message_t *msg, error_t error) {
     SerialAMBusy = FALSE;
   }
