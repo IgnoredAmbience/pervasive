@@ -7,8 +7,6 @@ implementation
 {
   components MainC, BlinkC, LedsC;
 
-  components new TimerMilliC() as BlinkTimer;
-
   components CC2420ActiveMessageC;
   components new AMReceiverC(AM_DATAMSG) as DataReceiver;
 
@@ -18,7 +16,6 @@ implementation
   BlinkC -> MainC.Boot;
 
   BlinkC.Leds -> LedsC;
-  BlinkC.BlinkTimer -> BlinkTimer;
 
   BlinkC.AMControl -> CC2420ActiveMessageC;
   BlinkC.DataReceive -> DataReceiver;

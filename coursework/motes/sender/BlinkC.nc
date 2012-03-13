@@ -28,6 +28,8 @@ module BlinkC {
     TEMP_CHANGE   = 20,         // Temp change required (raw ADC) for fire reading
     TEMP_READINGS = 30,         // Number of temp readings to check for fire determination
     BLINK_TIME    = 20,         // Length of time to blink fire LED on for (tx LED toggled on tx/done)
+
+    RELAYING      = FALSE,      // Enable flood-routing
   };
 
   message_t datapkt;
@@ -164,6 +166,9 @@ module BlinkC {
     if(dt >= TEMP_CHANGE && light_value < LIGHT && allNeighboursDark()) {
       call Leds.led0On();
       fire_detected = TRUE;
+    } else {
+      call Leds.led0Off();
+      fire_detected = FALSE;
     }
   }
 
@@ -181,7 +186,7 @@ module BlinkC {
       int idx = d_pkt->srcid - MINIMUM_NODEID;
       neighbours[idx].last_seen = 0;
       neighbours[idx].is_dark = (d_pkt->light < LIGHT);
-      if(neighbours[idx].last_synch_seen < d_pkt->sync_p) {
+      if(RELAYING && neighbours[idx].last_synch_seen < d_pkt->sync_p) {
         // Relay
         neighbours[idx].last_synch_seen = d_pkt->sync_p;
         if(!AMBusy) {
