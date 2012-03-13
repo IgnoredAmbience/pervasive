@@ -22,40 +22,34 @@ public class MessageProcessor {
 		temp = convertTemp(message.get_temperature());
 		lux = message.get_light();
 		fire = (0 != message.get_fire());
-		
-		setup();
-	}
-	
-	private double convertTemp(int adc) {
-		final int ADC_FS = 1023;
-		final int r1 = 10000; // Ohms
-		final double a = 0.001010024;
-		final double b = 0.000242127;
-		final double c = 0.000000146;
-		
-		double r_thr = r1*(ADC_FS-adc)/adc;
-		
-		double ln = Math.log(r_thr);
-		double recip = a + b * ln + c * Math.pow(ln, 3);
-		
-		return 1/recip;
-	}
-	
-	private void setup() {
-	    JSONObject json = getJSON();
-	    RestClient sendClient = new RestClient();
-	    sendClient.sendJSON(json);
+		System.out.println(timestamp + " : " + nodeID);
 	}
 
+	public JSONObject getCouchJSON() {
+		JSONObject json = new JSONObject();
+
+		try{
+			json.put("timestamp", timestamp);
+			json.put("sensorId", nodeToSensorID());
+			json.put("temp", temp);
+			json.put("lux", lux);
+		}
+		catch (JSONException e){
+			e.printStackTrace();
+		}
+		return json;
+		
+	}
+	
 	public JSONObject getJSON(){
 		JSONObject json = new JSONObject();
 		
 		
 		try{
-		json.put("groupId", "7");
-		json.put("key", "AWgbUdRae");
-		json.put("groupName", "Keeley and friends");
-		json.put("sensorData", getSensorIDList());
+			json.put("groupId", "7");
+			json.put("key", "AWgbUdRae");
+			json.put("groupName", "Keeley and friends");
+			json.put("sensorData", getSensorIDList());
 		}
 		catch (JSONException e){
 			e.printStackTrace();
@@ -113,6 +107,24 @@ public class MessageProcessor {
 	public boolean getFire() {
 		
 		return fire;
+	}
+	
+
+	
+	private double convertTemp(int adc) {
+		final int ADC_FS = 1023;
+		final int r1 = 10000; // Ohms
+		final double a = 0.001010024;
+		final double b = 0.000242127;
+		final double c = 0.000000146;
+		final double KELVIN_CELCIUS = 273.15;
+		
+		double r_thr = r1*(ADC_FS-adc)/adc;
+		
+		double ln = Math.log(r_thr);
+		double recip = a + b * ln + c * Math.pow(ln, 3);
+		
+		return 1/recip - KELVIN_CELCIUS;
 	}
 
 }
